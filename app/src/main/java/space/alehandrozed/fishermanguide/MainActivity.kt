@@ -1,15 +1,20 @@
 package space.alehandrozed.fishermanguide
 
+import android.content.res.TypedArray
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.MenuItem
 import android.widget.Toast
+import androidx.core.view.GravityCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.navigation.NavigationView
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.main_content.*
 
 class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
+
+    var adapter: MyAdapter? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -18,29 +23,75 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
         var list = ArrayList<ListItem>()
 
+        list.addAll(
+            fillArrays(
+                resources.getStringArray(R.array.fish),
+                resources.getStringArray(R.array.fish_content),
+                getImageId(R.array.fish_image)
+            )
+        )
 
-        list.add(ListItem(R.drawable.nalim, "Щука", "Хищник"))
-        list.add(ListItem(R.drawable.nalim, "Налим", "Спит на дне"))
-        list.add(ListItem(R.drawable.caras, "Карась", "Ловится на червя"))
-        list.add(ListItem(R.drawable.som, "Сом", "Ест лягушек"))
-        list.add(ListItem(R.drawable.som, "Сом", "Ест лягушек"))
-        list.add(ListItem(R.drawable.caras, "Карась", "Ловится на червя"))
-        list.add(ListItem(R.drawable.som, "Сом", "Ест лягушек"))
-        list.add(ListItem(R.drawable.som, "Сом", "Ест лягушек"))
         rcView.hasFixedSize()
         rcView.layoutManager = LinearLayoutManager(this)
-        rcView.adapter = MyAdapter(list, this)
+        adapter = MyAdapter(list, this)
+        rcView.adapter = adapter
 
 
     }
 
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
-            R.id.fish -> Toast.makeText(this, "Id fish", Toast.LENGTH_SHORT).show()
-            R.id.na -> Toast.makeText(this, "Id na", Toast.LENGTH_SHORT).show()
+            R.id.fish -> {
+                //Toast.makeText(this, "Id fish", Toast.LENGTH_SHORT).show()
+                adapter?.updateAdapter(
+                    fillArrays(
+                        resources.getStringArray(R.array.fish),
+                        resources.getStringArray(R.array.fish_content),
+                        getImageId(R.array.fish_image)
+                    )
+                )
+
+
+            }
+            R.id.na -> {
+                //Toast.makeText(this, "Id na", Toast.LENGTH_SHORT).show()
+                adapter?.updateAdapter(
+                    fillArrays(
+                        resources.getStringArray(R.array.na),
+                        resources.getStringArray(R.array.na_content),
+                        getImageId(R.array.na_image)
+                    )
+                )
+            }
             R.id.sna -> Toast.makeText(this, "Id sna", Toast.LENGTH_SHORT).show()
             R.id.history -> Toast.makeText(this, "Id history", Toast.LENGTH_SHORT).show()
         }
+        drawer_layout.closeDrawer(GravityCompat.START)
         return true
+    }
+
+    fun fillArrays(
+        titleArray: Array<String>,
+        contentArray: Array<String>,
+        imageArray: IntArray
+    ): List<ListItem> {
+        var listItemArray = ArrayList<ListItem>()
+
+        for (n in 0..titleArray.size - 1) {
+            var listItem = ListItem(imageArray[n], titleArray[n], contentArray[n])
+            listItemArray.add(listItem)
+        }
+        return listItemArray
+    }
+
+    fun getImageId(imageArrayId: Int): IntArray {
+        val tArray: TypedArray = resources.obtainTypedArray(imageArrayId)
+        val count = tArray.length()
+        val ids = IntArray(count)
+        for (i in ids.indices) {
+            ids[i] = tArray.getResourceId(i, 0)
+        }
+        tArray.recycle()
+        return ids
     }
 }
